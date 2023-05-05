@@ -49,16 +49,4 @@ class ProductController extends Controller
             'data' => $product
         ]);
     }
-
-    public function update(Request $request, $id)
-    {
-        $input = $request->all();
-
-        $product = Product::updated($input);
-        return response()->json([
-            'status' => true,
-            'data' => $product,
-            'message' => 'selamat data berhasil di update'
-        ]);
-    }
 }
