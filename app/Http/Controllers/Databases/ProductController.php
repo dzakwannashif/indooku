@@ -9,9 +9,27 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $product = Product::with(['category'])->get();
+        // $product = Product::query();
+        // $category_id = $request->query('category_id');
+        // $product->when($category_id, function($query) use($category_id){
+        //     $query->where('category_id', '=', $category_id);
+        // });
+        // $product = $product->get();
+
+        $category_id = $request->query('category_id');
+        // alesan menggunakan query karena kita mengaksesnya menggunakan method get
+
+        if (isset($category_id)) {
+            $product = Product::whereHas('category', function ($query) use ($category_id) {
+                $query->where('category_id', '=', $category_id);
+            })->with('category');
+        } else {
+            $product = Product::with('category');
+        }
+        $product = $product->get();
+
 
         return response()->json([
             'status' => true,
@@ -36,11 +54,11 @@ class ProductController extends Controller
 
 
         $validator = Validator::make($input, $rules);
-        if ($validator->errors()) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => $validator->errors()
-            ]);
+            ], 400);
         }
 
         $product = Product::create($input);

@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -25,6 +26,28 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        // jika terdeteksi route api tidak login terlebih dahulu
+        $this->renderable(function (RouteNotFoundException $e, $request,) {
+
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'You do not have the required authorization.',
+                ], 403);
+            }
+        });
+
+        // jika terdeteksi tidak punya izin untuk akses
+        $this->renderable(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, $request) {
+
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'You do not have the required authorization.',
+                ], 403);
+            }
         });
     }
 }

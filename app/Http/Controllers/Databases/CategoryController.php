@@ -9,8 +9,13 @@ use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
+
+
     public function index()
     {
+        //! agar hanya namanya saja yang ditampilkan
+        // $category = Category::select(['name'])->latest()->get();
+
         $category = Category::latest()->get();
 
         return response()->json([
@@ -28,7 +33,7 @@ class CategoryController extends Controller
         ];
 
         $validator = Validator::make($input, $rules);
-        if ($validator->errors()) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => $validator->errors()
@@ -38,7 +43,7 @@ class CategoryController extends Controller
         $category = Category::create($input);
         return response()->json([
             'status' => true,
-            'data' => $input,
+            'data' => $category,
             'message' => 'data berhasil ditambahkan'
         ]);
     }
