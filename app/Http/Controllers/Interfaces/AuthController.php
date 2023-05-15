@@ -60,6 +60,8 @@ class AuthController extends Controller
 
             'password' => 'required|min:8',
             //ditetapkan minimal pass yaitu 8
+
+            'role' => 'required|exists:roles,name'
         ];
 
         $validator = Validator::make($input, $rules);
@@ -73,6 +75,9 @@ class AuthController extends Controller
         // $credentials = $request->only(['name', 'email', 'password']);
         $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
+
+        $user->assignRole($input['role']);
+
 
         $token = $user->createToken('authToken')->plainTextToken;
         return response()->json([

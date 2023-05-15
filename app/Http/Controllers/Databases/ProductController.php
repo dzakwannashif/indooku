@@ -46,7 +46,7 @@ class ProductController extends Controller
             'name' => 'required',
             'price' => 'required',
             'stock' => 'required',
-            'image' => 'required',
+            'image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'description' => 'required',
             'category_id' => 'required'
         ];
@@ -59,6 +59,13 @@ class ProductController extends Controller
                 'status' => false,
                 'message' => $validator->errors()
             ], 400);
+        }
+
+        if ($request->file('image')) {
+            $file = $request->file('image');
+            $filename = date('YmdHi') . $file->getClientOriginalName();
+            $file->move(public_path('uploads'), $filename);
+            $input['image'] = $filename;
         }
 
         $product = Product::create($input);

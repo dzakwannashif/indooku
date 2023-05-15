@@ -49,8 +49,8 @@ Route::post('/userUpdate/{id}', [UserController::class, 'update']);
 Route::delete('/userDelete/{id}', [UserController::class, 'delete']);
 
 Route::get('/perm', [PermissionController::class, 'index']);
-// Route::post('/permStore', [PermissionController::class, 'store'])->middleware(['permission:create-permission']);
-Route::post('/permStore', [PermissionController::class, 'store']);
+Route::post('/permStore', [PermissionController::class, 'store'])->middleware(['auth', 'permission:create-permission']);
+// Route::post('/permStore', [PermissionController::class, 'store']);
 Route::post('/permUpdate/{id}', [PermissionController::class, 'update']);
 Route::delete('/permDelete/{id}', [PermissionController::class, 'delete']);
 
