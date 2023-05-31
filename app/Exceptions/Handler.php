@@ -48,6 +48,8 @@ class Handler extends ExceptionHandler
                     'message' => 'You do not have the required authorization.',
                 ], 403);
             }
+
+            // return redirect('/login');
         });
     }
 }

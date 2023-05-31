@@ -5,7 +5,7 @@
 
 
 
-        <h1 class="h3 mb-2 text-gray-800">Update Data Karyawan</h1>
+        <h1 class="h3 mb-2 text-gray-800">Update Data Category</h1>
         <a href="{{ route('category.data') }}" class="btn btn-primary">Back</a>
 
 
@@ -14,6 +14,15 @@
             <div class="card-body">
                 <form method="POST" action="{{ route('category.update', $category->id) }}" enctype="multipart/form-data">
                     @csrf
+
+                    <div class="form-group">
+                        <label for="image_create">Foto Barang:</label>
+                        <input type="file" name="image" id="image_create"
+                            class="form-control @error('image') is-invalid @enderror">
+                        @error('image')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
 
                     <div class="form-group">
                         <label for="nameCreate">Nama Category:</label>

@@ -24,6 +24,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>Name</th>
+                                <th>Image</th>
                                 <th>Created At</th>
                                 <th>Updated At</th>
                                 <th>Action</th>
@@ -34,6 +35,9 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $i->name }}</td>
+                                    <td><img src="{{ asset('uploads') . '/' . $i->image }}" alt="{{ $i->image }}"
+                                            style="height:200px">
+                                    </td>
                                     <td>{{ $i->created_at }}</td>
                                     <td>{{ $i->updated_at }}</td>
                                     <td>

@@ -10,6 +10,7 @@ class CategoryWebController extends Controller
 {
     public function tampil()
     {
+
         $datas = Category::orderBy('created_at', 'asc')->get();
         return view('category.index', compact('datas'));
     }
@@ -29,10 +30,18 @@ class CategoryWebController extends Controller
     {
         $input = $request->all();
         $rules = [
-            'name' => 'required'
+            'name' => 'required',
+            'image' => 'required|image|mimes:jpeg,jpg,png|max:2048'
         ];
 
         $request->validate($rules);
+
+        if ($request->file('image')) {
+            $file = $request->file('image');
+            $fileName = date('YmdHi') . $file->getClientOriginalName();
+            $file->move(public_path('uploads'), $fileName);
+            $input['image'] = $fileName;
+        }
 
         Category::create($input);
         return redirect('/category');
@@ -59,7 +68,7 @@ class CategoryWebController extends Controller
     {
         $category = Category::find($id);
 
-        $category->delete($category);
+        $category->delete();
 
         return redirect('/category');
     }

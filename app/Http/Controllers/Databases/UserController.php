@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Databases;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -26,6 +27,7 @@ class UserController extends Controller
         $rules = [
             'name' => 'required',
             'email' => 'required',
+            'image' => 'image|memes:jpg,jpeg,png|max:2048',
             'password' => 'required',
         ];
 
@@ -38,6 +40,13 @@ class UserController extends Controller
         }
 
         $input['password'] = Hash::make($input['password']);
+
+        if ($request->file('image')) {
+            $file = $request->file('image');
+            $fileName = date('YmdHi') . $file->getClientOriginalName();
+            $file->move(public_path('uploads'), $fileName);
+            $input['image'] = $fileName;
+        }
 
         $users = User::create($input);
         return response()->json([

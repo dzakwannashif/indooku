@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Databases;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
@@ -28,12 +29,16 @@ class ProductController extends Controller
         } else {
             $product = Product::with('category');
         }
-        $product = $product->get();
+        $productsArr = $product->get()->toArray();
+        $productsData = array_map(function ($productSingle) {
+            $productSingle['image'] = url('uploads/' . $productSingle['image']);
+            return $productSingle;
+        }, $productsArr);
 
 
         return response()->json([
             'status' => true,
-            'data' => $product,
+            'data' => $productsData,
             'message' => 'Data berhasil ditampilkan'
         ]);
     }
@@ -63,15 +68,73 @@ class ProductController extends Controller
 
         if ($request->file('image')) {
             $file = $request->file('image');
-            $filename = date('YmdHi') . $file->getClientOriginalName();
+            $filename = time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('uploads'), $filename);
             $input['image'] = $filename;
+        } else {
+            unset($input['image']);
         }
 
         $product = Product::create($input);
         return response()->json([
             'status' => true,
             'data' => $product
+        ]);
+    }
+
+    function update(Request $request, $id)
+    {
+        $input = $request->all();
+
+        $product = Product::find($id);
+        if (!$product) {
+            return response()->json([
+                'status' => false,
+                'message' => 'id tidak ditemukan'
+            ]);
+        }
+
+        if ($request->file('image')) {
+            $path = 'uploads' . '/' . $product->image;
+            if (File::exists($path)) {
+                File::delete($path);
+            }
+            $file = $request->file('image');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads'), $filename);
+            $input['image'] = $filename;
+        } else {
+            unset($input['image']);
+        }
+
+        $product->update($input);
+        return response()->json([
+            'status' => true,
+            'data' => $product,
+            'message' => 'selamat data berhasil di update'
+        ]);
+    }
+
+    public function delete($id)
+    {
+        $product = Product::find($id);
+        if (!$product) {
+            return response()->json([
+                'status' => false,
+                'message' => 'id not found',
+            ]);
+        }
+
+        $path = 'uploads' . '/' . $product->image;
+        if (File::exists($path)) {
+            File::delete($path);
+        }
+
+        $product->delete($product);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'data berhasil dihapus'
         ]);
     }
 }

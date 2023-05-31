@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function loginUser(Request $request)
+    public function login(Request $request)
     {
         $input = $request->all();
 
@@ -21,6 +21,7 @@ class AuthController extends Controller
 
             'password' => 'required|min:8',
             //ditetapkan minimal pass yaitu 8
+
         ];
 
         $validator = Validator::make($input, $rules);
@@ -48,12 +49,14 @@ class AuthController extends Controller
         ], 401);
     }
 
-    public function registerUser(Request $request)
+    public function register(Request $request)
     {
         $input = $request->all();
 
         $rules = [
             'name' => 'required',
+
+            'image' => 'image|mimes:jpeg,jpg,png|max:2048',
 
             'email' => 'required|email|unique:users,email',
             //ditetapkan input dengan email format
@@ -61,7 +64,6 @@ class AuthController extends Controller
             'password' => 'required|min:8',
             //ditetapkan minimal pass yaitu 8
 
-            'role' => 'required|exists:roles,name'
         ];
 
         $validator = Validator::make($input, $rules);
@@ -72,11 +74,20 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($request->file('image')) {
+            $file = $request->file('image');
+            $fileName = date('YmdHi') . $file->getClientOriginalName();
+            $file->move(public_path('uploads'), $fileName);
+            $input['image'] = $fileName;
+        } else {
+            unset($input['image']);
+        }
+
         // $credentials = $request->only(['name', 'email', 'password']);
         $input['password'] = Hash::make($input['password']);
-        $user = User::create($input);
 
-        $user->assignRole($input['role']);
+        $user = User::create($input);
+        $user->assignRole('user');
 
 
         $token = $user->createToken('authToken')->plainTextToken;
@@ -88,32 +99,25 @@ class AuthController extends Controller
         ]);
     }
 
-    public function updateUser(Request $request, $id)
+    public function update(Request $request)
     {
         $input = $request->all();
 
-        $rules = [
-            'email' => 'unique:users,email,' . $id
-        ];
+        $userAuth = auth()->user();
+        $user = User::find($userAuth->id);
 
 
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'user id tidak ditemukan'
-            ]);
+        if ($request->file('image')) {
+            $file = $request->file('image');
+            $fileName = date('YmdHi') . $file->getClientOriginalName();
+            $file->move('uploads', $fileName);
+            $input['image'] = $fileName;
         }
-
-
         $user->update($input);
-
-        $token = $user->createToken('authToken')->plainTextToken;
         return response()->json([
             'status' => true,
-            'data' => $user,
-            'token' => $token,
-            'message' => 'data berhasil di update'
+            'message' => 'Berhasil update',
+            'data' => $user
         ]);
     }
 
